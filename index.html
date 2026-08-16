@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EGG HUNT | イースターエッグを探せ</title>
+<meta name="description" content="サイト内に隠された50個のイースターエッグをすべて見つけ出せ！PC・スマホ両対応の隠し要素探索ゲーム。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥚</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home">
+
+<header class="site-header">
+  <button id="site-logo" type="button" data-console-trigger>🥚 EGG HUNT</button>
+  <nav class="site-nav" id="site-nav">
+    <a href="#home" data-route="home">ホーム</a>
+    <a href="#about" data-route="about">About</a>
+    <a href="#gallery" data-route="gallery">ギャラリー</a>
+    <a href="#blog" data-route="blog">ブログ</a>
+    <a href="#contact" data-route="contact">お問い合わせ</a>
+    <a href="#settings" data-route="settings">設定</a>
+  </nav>
+  <div class="header-right">
+    <button id="header-bell" type="button" aria-label="お知らせ">🔔</button>
+    <button id="nav-toggle" type="button" aria-label="メニュー">☰</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HOME ============ -->
+  <section class="page-section" id="page-home" data-route="home">
+    <div class="hero">
+      <img id="hero-img" src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.85em%22 font-size=%2290%22>🐰</text></svg>" alt="うさぎ">
+      <h1>EGG HUNT へようこそ</h1>
+      <p>このサイトのどこかに、全50個のイースターエッグが隠れています。<br>見た目はごく普通のサイトですが…油断は禁物です。</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>くるくるアイコン</h3>
+        <p>気になったら、押してみて。</p>
+        <div class="icon-cycler" id="icon-cycler">🌱</div>
+      </div>
+      <div class="card">
+        <h3>いいねボタン</h3>
+        <p>このサイトが気に入ったら押してね。</p>
+        <div class="like-widget">
+          <button id="like-btn" type="button">👍 いいね <span id="like-count">0</span></button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>ヘッダーの通知</h3>
+        <p>🔔 は伊達じゃないかもしれない。</p>
+      </div>
+    </div>
+
+    <div class="snow-globe" id="snow-globe">
+      <h3>スノードーム</h3>
+      <div class="globe">🔮</div>
+      <div><button id="shake-btn" type="button">振ってみる</button></div>
+      <p style="font-size:.8rem;color:var(--text-mute)">実機ならそのままサイトを開いた状態で本当に振ってもOK。</p>
+    </div>
+
+    <p class="secret-text">このあたりの余白は何も無いように見えるけれど、範囲選択するとこっそり文字が浮かび上がるよ。（Ctrl+Aや長押し選択を試してみて）</p>
+
+    <div style="height:60vh"></div>
+    <p style="text-align:center;color:var(--text-mute)">まだ下にあります…</p>
+    <div style="height:40vh"></div>
+    <p style="text-align:center;color:var(--text-mute);font-size:.85rem">（このさらに下までスクロールし続けると何かが起きるかも）</p>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="page-section" id="page-about" data-route="about">
+    <h1>About</h1>
+    <p>EGG HUNT は、ウェブサイトのあらゆる場所に隠し要素をちりばめた探索ゲームです。ボタンを押す、待つ、隠す、組み合わせる——遊び方は人それぞれ。</p>
+    <p>むかしむかし、この物語の卵たちは、インターネットの奥深くに<a href="#" id="about-hidden-link" style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--text-mute);">自分たちだけの</a>隠れ家を持っていました。</p>
+    <div class="riddle-box">
+      その隠れ家には「呼び名」がありました。もしこの物語の続きが気になるなら、このページのアドレスの一番うしろに、次の呼び名を「#」をつけて足してアクセスしてみてください。呼び名は — <strong>himitsu</strong>（ひみつ、のローマ字）。
+    </div>
+    <p>制作: 個人開発 / このサイトはGitHub Pagesで公開されています。</p>
+  </section>
+
+  <!-- ============ HIMITSU (hidden reward page) ============ -->
+  <section class="page-section" id="page-himitsu" data-route="himitsu">
+    <h1>🕳️ ひみつの続き</h1>
+    <p>ここまでたどり着けるとは……おめでとうございます。ここは物語の「続き」、隠れ家そのものです。</p>
+    <p>他の卵たちはまだ見つかるのを待っています。コレクションパネルから進捗を確認してみましょう。</p>
+  </section>
+
+  <!-- ============ GALLERY ============ -->
+  <section class="page-section" id="page-gallery" data-route="gallery">
+    <h1>ギャラリー</h1>
+    <p>いくつか写真を並べていますが、1枚だけ壊れているようです。</p>
+    <div class="gallery-grid">
+      <div class="gallery-item" data-dbl>🌸</div>
+      <div class="gallery-item" data-dbl>🍃</div>
+      <div class="gallery-item broken" id="broken-img">🖼️💥</div>
+      <div class="gallery-item" data-dbl>🌤️</div>
+      <div class="gallery-item" data-dbl>🍂</div>
+      <div class="gallery-item" data-dbl>🌊</div>
+    </div>
+
+    <h2 style="margin-top:36px">収穫祭</h2>
+    <p>ウサギをカゴまでドラッグ＆ドロップしてみよう。（スマホは指で長押ししてスライド）</p>
+    <div class="dnd-zone">
+      <div class="dnd-item" id="dnd-rabbit" draggable="true">🐰</div>
+      <div class="dnd-target" id="dnd-basket">🧺 ここへ</div>
+    </div>
+  </section>
+
+  <!-- ============ BLOG ============ -->
+  <section class="page-section" id="page-blog" data-route="blog">
+    <h1>ブログ</h1>
+    <article class="card" style="margin-bottom:14px">
+      <h3>うたたねの午後</h3>
+      <p style="font-size:.88rem;color:var(--text-mute)">春の日差しの中、庭でうたた寝をするのが最近のお気に入りです。目が覚めたら、卵が一つ増えていました。</p>
+    </article>
+    <article class="card" style="margin-bottom:14px">
+      <h3>さがしものが好きな理由</h3>
+      <p style="font-size:.88rem;color:var(--text-mute)">小さい頃から、隠されたものを見つけるのが得意でした。今もその癖が抜けません。</p>
+    </article>
+    <article class="card" style="margin-bottom:14px">
+      <h3>ぎゅうにゅうと卵焼き</h3>
+      <p style="font-size:.88rem;color:var(--text-mute)">朝食の定番。シンプルだけど飽きません。皆さんの朝食は何ですか？</p>
+    </article>
+
+    <div class="card">
+      <h3>🔑 合言葉</h3>
+      <p style="font-size:.85rem;color:var(--text-mute)">3つの記事タイトルの頭文字をつなげると、ある言葉になります。わかったら入力してみて。</p>
+      <form id="blog-password-form" class="site-form" style="margin-top:10px">
+        <label>合言葉
+          <input type="text" id="blog-password-input" placeholder="ひらがなで入力">
+        </label>
+        <button type="submit">送信</button>
+        <p id="blog-password-msg" style="font-size:.8rem;color:var(--accent)"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="page-section" id="page-contact" data-route="contact">
+    <h1>お問い合わせ</h1>
+    <p>ご意見・ご感想はこちらから（このフォームは実際には送信されません）。</p>
+    <form id="contact-form" class="site-form">
+      <label>お名前
+        <input type="text" id="contact-name" name="name" autocomplete="off">
+      </label>
+      <label>メールアドレス
+        <input type="email" id="contact-email" name="email" autocomplete="off">
+      </label>
+      <label>メッセージ
+        <textarea id="contact-message" name="message" rows="4"></textarea>
+      </label>
+      <button type="submit">送信する</button>
+      <p id="contact-msg" style="font-size:.8rem;color:var(--accent)"></p>
+    </form>
+
+    <div class="card" style="margin-top:24px">
+      <h3>📍 現在地共有</h3>
+      <p style="font-size:.85rem;color:var(--text-mute)">お近くの情報をお届けするために、位置情報を使えます（任意）。</p>
+      <button class="btn btn-outline" type="button" data-geo-btn>現在地を教えて</button>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>🔗 このサイトをシェア</h3>
+      <button class="btn" type="button" data-share-btn>シェアする</button>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section class="page-section" id="page-settings" data-route="settings">
+    <h1>設定</h1>
+
+    <div class="settings-row">
+      <div><strong>ダークモード</strong><div style="font-size:.78rem;color:var(--text-mute)">サイト全体の見た目を切り替えます</div></div>
+      <label class="switch"><input type="checkbox" id="darkmode-toggle"><span class="slider"></span></label>
+    </div>
+
+    <div class="settings-row">
+      <div><strong>ミュート</strong></div>
+      <label class="switch"><input type="checkbox" id="mute-toggle"><span class="slider"></span></label>
+    </div>
+    <div class="settings-row">
+      <div><strong>音量</strong></div>
+      <input type="range" id="volume-slider" min="0" max="100" value="50">
+    </div>
+
+    <div class="settings-row">
+      <div><strong>効果音</strong><div style="font-size:.78rem;color:var(--text-mute)">エッグ発見時のサウンド</div></div>
+      <label class="switch"><input type="checkbox" id="sound-toggle" checked><span class="slider"></span></label>
+    </div>
+
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <strong>ひみつのコード</strong>
+      <div style="font-size:.78rem;color:var(--text-mute)">ページのソースのどこかに隠されたコードを入力してください</div>
+      <form id="secret-code-form" style="display:flex;gap:8px;width:100%">
+        <input type="text" id="secret-code-input" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)" placeholder="コードを入力">
+        <button class="btn" type="submit">送信</button>
+      </form>
+      <p id="secret-code-msg" style="font-size:.8rem;color:var(--accent)"></p>
+    </div>
+
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <strong>画面幅シミュレーター（円周率マニア向け）</strong>
+      <div style="font-size:.78rem;color:var(--text-mute)">実際のウィンドウ幅: <span id="eh-width-display">-</span>　／　目標: 314px にリサイズしてみて（スマホはウィンドウを持つ端末では試せないので、PCでの挑戦を推奨）</div>
+      <input type="range" id="width-sim-slider" min="200" max="500" value="350" style="width:100%">
+    </div>
+
+    <div class="settings-row">
+      <div><strong>進捗をリセット</strong><div style="font-size:.78rem;color:var(--text-mute)">見つけたエッグの記録をすべて消去します</div></div>
+      <button class="btn btn-outline" id="reset-progress-btn" type="button">リセット</button>
+    </div>
+
+    <p style="font-size:.75rem;color:var(--text-mute);margin-top:24px">小さな点 <button class="tiny-dot" type="button" data-vibrate-btn aria-label="振動"></button> は、実は押せます。</p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>© <span id="footer-year">2026</span> EGG HUNT — Easter Egg Hunting Game</p>
+  <p style="opacity:.6">Made for people who like to look closely.</p>
+  <p style="opacity:.4;font-size:.7rem" id="footer-version"></p>
+</footer>
+
+<!--
+  ひみつのコード: SU-42
+  （設定ページの「ひみつのコード」欄に入力してみて）
+-->
+
+<script src="js/eggs-data.js"></script>
+<script src="js/version.js"></script>
+<script src="js/eggs-core.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var v = document.getElementById("footer-version");
+    if (v && window.EGG_HUNT_VERSION) v.textContent = "v" + window.EGG_HUNT_VERSION;
+  });
+</script>
+</body>
+</html>
