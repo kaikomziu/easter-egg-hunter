@@ -14,10 +14,12 @@
     initSettingsEggs();
     initFooterHeaderEggs();
     initCookieBanner();
+    initZukanEggs();
+    initMiniGame();
   });
 
   /* ---------------------------- ルーティング ---------------------------- */
-  var VALID_ROUTES = ["home", "about", "gallery", "blog", "contact", "settings", "himitsu"];
+  var VALID_ROUTES = ["home", "about", "gallery", "blog", "contact", "settings", "himitsu", "zukan", "zukan-ura", "minigame"];
   function initRouter() {
     window.addEventListener("hashchange", render);
     render();
@@ -42,6 +44,8 @@
       });
       window.scrollTo({ top: 0 });
       if (route === "himitsu") window.EggHunter.unlock("hash_himitsu");
+      if (route === "zukan-ura") window.EggHunter.unlock("hash_zukan_ura");
+      window.EggHunter.trackVisit(route);
     }
   }
 
@@ -61,6 +65,9 @@
       iconEl.textContent = icons[iconClicks % icons.length];
       if (iconClicks >= 10) window.EggHunter.unlock("icon_click10");
     });
+
+    var icon2 = document.getElementById("icon-cycler2");
+    if (icon2) window.ehBindClickCounter(icon2, 5, function () { window.EggHunter.unlock("home_icon_click5_v2"); });
 
     var likeBtn = document.getElementById("like-btn");
     var likeCountEl = document.getElementById("like-count");
@@ -110,6 +117,9 @@
     yearEl.textContent = new Date().getFullYear();
     window.ehBindClickCounter(yearEl, 7, function () { window.EggHunter.unlock("footer_year_click7"); });
 
+    var creditEl = document.getElementById("footer-credit");
+    if (creditEl) window.ehBindClickCounter(creditEl, 5, function () { window.EggHunter.unlock("footer_credit_click5"); });
+
     var hiddenLink = document.getElementById("about-hidden-link");
     if (hiddenLink) {
       hiddenLink.addEventListener("click", function (e) {
@@ -127,6 +137,9 @@
     document.querySelectorAll(".gallery-item[data-dbl]").forEach(function (el) {
       el.addEventListener("dblclick", function () { window.EggHunter.unlock("gallery_dblclick"); });
     });
+
+    var longpressItem = document.getElementById("gallery-item-longpress");
+    if (longpressItem) window.ehBindLongPress(longpressItem, function () { window.EggHunter.unlock("gallery_longpress2"); }, 1000);
 
     var rabbit = document.getElementById("dnd-rabbit");
     var basket = document.getElementById("dnd-basket");
@@ -211,6 +224,12 @@
 
   /* ---------------------------- 設定 ---------------------------- */
   function initSettingsEggs() {
+    var settingsTitle = document.getElementById("settings-title");
+    if (settingsTitle) window.ehBindClickCounter(settingsTitle, 5, function () { window.EggHunter.unlock("settings_label_click5"); });
+
+    var quizForm = document.getElementById("quiz-total-form");
+    if (quizForm) quizForm.setAttribute("data-answer", String(window.EGG_TOTAL));
+
     var darkToggle = document.getElementById("darkmode-toggle");
     var savedTheme = localStorage.getItem("eggHunterTheme");
     if (savedTheme === "dark") {
@@ -222,6 +241,7 @@
       var dark = darkToggle.checked;
       document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
       localStorage.setItem("eggHunterTheme", dark ? "dark" : "light");
+      window.EggHunter.markInteracted("dark");
       var now = Date.now();
       toggleStamps.push(now);
       toggleStamps = toggleStamps.filter(function (t) { return now - t <= 3000; });
@@ -235,13 +255,14 @@
         window.EggHunter.unlock("mute_maxvolume");
       }
     }
-    muteToggle.addEventListener("change", checkMuteVolume);
+    muteToggle.addEventListener("change", function () { window.EggHunter.markInteracted("mute"); checkMuteVolume(); });
     volumeSlider.addEventListener("input", checkMuteVolume);
 
     var soundToggle = document.getElementById("sound-toggle");
     soundToggle.checked = window.EggHunter.getSettings().sound !== false;
     soundToggle.addEventListener("change", function () {
       window.EggHunter.setSetting("sound", soundToggle.checked);
+      window.EggHunter.markInteracted("sound");
     });
 
     var codeForm = document.getElementById("secret-code-form");
@@ -293,6 +314,165 @@
     function dismiss() {
       localStorage.setItem("eggHunterCookieDismissed", "1");
       banner.remove();
+    }
+  }
+
+  /* ---------------------------- 図鑑 ---------------------------- */
+  function initZukanEggs() {
+    var groups = { easy: document.getElementById("zukan-easy"), medium: document.getElementById("zukan-medium"), hard: document.getElementById("zukan-hard") };
+    if (!groups.easy) return;
+    var items = window.EGG_DATA.filter(function (e) { return e.zukan; });
+
+    items.forEach(function (egg) {
+      var target = groups[egg.tier];
+      if (!target) return;
+      var tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "zukan-tile" + (window.EggHunter.isFound(egg.id) ? " collected" : "");
+      tile.setAttribute("data-id", egg.id);
+      tile.innerHTML = '<span>' + egg.icon + '</span><span class="zukan-tile-title">' +
+        (window.EggHunter.isFound(egg.id) ? egg.title : "？？？") + '</span>';
+      target.appendChild(tile);
+
+      var need = egg.need || { type: "click", count: 1 };
+      var cb = function () { window.EggHunter.unlock(egg.id); };
+      if (need.type === "click") {
+        window.ehBindClickCounter(tile, need.count || 1, cb);
+      } else if (need.type === "dblclick") {
+        tile.addEventListener("dblclick", cb);
+      } else if (need.type === "longpress") {
+        window.ehBindLongPress(tile, cb, need.ms || 1000);
+      } else if (need.type === "hover") {
+        window.ehBindHoverHold(tile, need.ms || 2000, cb);
+      }
+    });
+
+    document.addEventListener("eh:unlock", function (e) {
+      var tile = document.querySelector('.zukan-tile[data-id="' + e.detail.id + '"]');
+      if (tile) {
+        tile.classList.add("collected");
+        var egg = items.find(function (x) { return x.id === e.detail.id; });
+        if (egg) tile.querySelector(".zukan-tile-title").textContent = egg.title;
+      }
+    });
+  }
+
+  /* ---------------------------- ミニゲーム ---------------------------- */
+  function initMiniGame() {
+    // 反射神経ゲーム
+    var startBtn = document.getElementById("reaction-start");
+    var arena = document.getElementById("reaction-arena");
+    var target = document.getElementById("reaction-target");
+    var status = document.getElementById("reaction-status");
+    if (startBtn && arena && target) {
+      startBtn.addEventListener("click", function () {
+        startBtn.disabled = true;
+        var round = 0, hits = 0, roundTimer = null, hideTimer = null;
+        status.textContent = "ラウンド開始…";
+        nextRound();
+
+        function nextRound() {
+          round++;
+          if (round > 5) {
+            finish();
+            return;
+          }
+          status.textContent = "ラウンド " + round + " / 5";
+          var delay = 500 + Math.random() * 1500;
+          roundTimer = setTimeout(showTarget, delay);
+        }
+        function showTarget() {
+          var w = arena.clientWidth - 60, h = arena.clientHeight - 60;
+          target.style.left = Math.max(0, Math.random() * w) + "px";
+          target.style.top = Math.max(0, Math.random() * h) + "px";
+          target.classList.remove("eh-hidden");
+          var clicked = false;
+          var onHit = function () {
+            if (clicked) return;
+            clicked = true;
+            hits++;
+            clearTimeout(hideTimer);
+            target.classList.add("eh-hidden");
+            target.removeEventListener("click", onHit);
+            nextRound();
+          };
+          target.addEventListener("click", onHit);
+          hideTimer = setTimeout(function () {
+            if (clicked) return;
+            target.classList.add("eh-hidden");
+            target.removeEventListener("click", onHit);
+            nextRound();
+          }, 1200);
+        }
+        function finish() {
+          startBtn.disabled = false;
+          status.textContent = hits + " / 5 ヒット！";
+          if (hits >= 1) window.EggHunter.unlock("minigame_clear");
+          if (hits === 5) window.EggHunter.unlock("minigame_perfect");
+        }
+      });
+    }
+
+    // 百打の的
+    var click100 = document.getElementById("click100-target");
+    var click100Count = document.getElementById("click100-count");
+    if (click100 && click100Count) {
+      var n = Number(localStorage.getItem("eggHunterClick100") || "0");
+      click100Count.textContent = n;
+      click100.addEventListener("click", function () {
+        n++;
+        click100Count.textContent = n;
+        localStorage.setItem("eggHunterClick100", String(n));
+        if (n >= 100) window.EggHunter.unlock("click_100_times");
+      });
+    }
+
+    // 静止チャレンジ
+    var stillTarget = document.getElementById("stillness-target");
+    var stillStatus = document.getElementById("stillness-status");
+    if (stillTarget) {
+      var stillTimer = null, startPos = null;
+      var THRESHOLD = 8, DURATION = 15000;
+
+      function stillStart(x, y) {
+        startPos = { x: x, y: y };
+        stillStatus.textContent = "0 / 15 秒";
+        var startedAt = Date.now();
+        clearInterval(stillTimer);
+        stillTimer = setInterval(function () {
+          var elapsed = Date.now() - startedAt;
+          stillStatus.textContent = Math.min(15, Math.floor(elapsed / 1000)) + " / 15 秒";
+          if (elapsed >= DURATION) {
+            clearInterval(stillTimer);
+            window.EggHunter.unlock("stillness_challenge");
+            stillStatus.textContent = "クリア！🎉";
+          }
+        }, 200);
+      }
+      function stillCheck(x, y) {
+        if (!startPos) return;
+        var dx = x - startPos.x, dy = y - startPos.y;
+        if (Math.sqrt(dx * dx + dy * dy) > THRESHOLD) {
+          clearInterval(stillTimer);
+          startPos = null;
+          stillStatus.textContent = "動いてしまった…もう一度";
+        }
+      }
+      function stillEnd() {
+        clearInterval(stillTimer);
+        startPos = null;
+      }
+
+      stillTarget.addEventListener("mouseenter", function (e) { stillStart(e.clientX, e.clientY); });
+      stillTarget.addEventListener("mousemove", function (e) { stillCheck(e.clientX, e.clientY); });
+      stillTarget.addEventListener("mouseleave", stillEnd);
+      stillTarget.addEventListener("touchstart", function (e) {
+        var t = e.touches[0]; stillStart(t.clientX, t.clientY);
+      }, { passive: true });
+      stillTarget.addEventListener("touchmove", function (e) {
+        var t = e.touches[0]; stillCheck(t.clientX, t.clientY);
+      }, { passive: true });
+      stillTarget.addEventListener("touchend", stillEnd);
     }
   }
 })();

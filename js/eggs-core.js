@@ -18,10 +18,17 @@
         var parsed = JSON.parse(raw);
         parsed.found = parsed.found || {};
         parsed.playSeconds = parsed.playSeconds || 0;
+        parsed.totalClicks = parsed.totalClicks || 0;
+        parsed.hintUsed = !!parsed.hintUsed;
+        parsed.firstVisitAt = parsed.firstVisitAt || new Date().toISOString();
+        parsed.interacted = parsed.interacted || { dark: false, mute: false, sound: false };
         return parsed;
       }
     } catch (e) { /* ignore corrupt data */ }
-    return { found: {}, playSeconds: 0 };
+    return {
+      found: {}, playSeconds: 0, totalClicks: 0, hintUsed: false,
+      firstVisitAt: new Date().toISOString(), interacted: { dark: false, mute: false, sound: false }
+    };
   }
 
   function saveProgress() {
@@ -58,6 +65,9 @@
     }
     return null;
   }
+
+  function zukanTotal() { return window.EGG_DATA.filter(function (e) { return e.zukan; }).length; }
+  function zukanFound() { return window.EGG_DATA.filter(function (e) { return e.zukan && isFound(e.id); }).length; }
 
   /* ---------------------- サウンド（外部ファイル不要） ---------------------- */
   var audioCtx = null;
@@ -176,6 +186,10 @@
         var hint = btn.nextElementSibling;
         hint.classList.toggle("eh-hidden");
         btn.textContent = hint.classList.contains("eh-hidden") ? "ヒントを見る" : "ヒントを隠す";
+        if (!hint.classList.contains("eh-hidden") && !state.hintUsed) {
+          state.hintUsed = true;
+          saveProgress();
+        }
       });
     });
   }
@@ -238,12 +252,14 @@
   }
 
   /* ---------------------------- unlock 本体 ---------------------------- */
+  var recentUnlocks = [];
   function unlock(id) {
     if (!id) return;
     if (isFound(id)) return;
     var egg = eggById(id);
     if (!egg) return;
-    state.found[id] = new Date().toISOString();
+    var now = Date.now();
+    state.found[id] = new Date(now).toISOString();
     saveProgress();
     updateFab();
     if (!document.getElementById("eh-panel-overlay").classList.contains("eh-hidden")) {
@@ -252,6 +268,14 @@
     var isLegendary = id === "complete_all";
     playChime(isLegendary);
     showToast(egg, isLegendary);
+    document.dispatchEvent(new CustomEvent("eh:unlock", { detail: { id: id } }));
+
+    recentUnlocks.push(now);
+    recentUnlocks = recentUnlocks.filter(function (t) { return now - t <= 60000; });
+    if (recentUnlocks.length >= 5) unlock("combo_5in60s");
+
+    if (now - new Date(state.firstVisitAt).getTime() >= 24 * 3600 * 1000) unlock("comeback_24h");
+
     checkMeta();
     if (isLegendary) setTimeout(showCompleteCelebration, 600);
   }
@@ -262,6 +286,12 @@
     if (!isFound("all_medium") && foundCount("medium") === tierTotal("medium")) unlock("all_medium");
     if (!isFound("all_hard") && foundCount("hard") === tierTotal("hard")) unlock("all_hard");
     if (!isFound("meta_10eggs") && foundCount() >= 10) unlock("meta_10eggs");
+    if (!isFound("all_zukan") && zukanFound() === zukanTotal()) unlock("all_zukan");
+    if (!isFound("no_hint_20") && !state.hintUsed && foundCount() >= 20) unlock("no_hint_20");
+    if (!isFound("total_click_500") && state.totalClicks >= 500) unlock("total_click_500");
+    if (!isFound("konami_master") && isFound("konami_code") && isFound("shortcut_konami_reverse") && isFound("konami_on_404")) unlock("konami_master");
+    if (!isFound("settings_explorer") && state.interacted.dark && state.interacted.mute && state.interacted.sound) unlock("settings_explorer");
+    if (!isFound("night_visit_and_zukan") && isFound("night_visit") && isFound("all_zukan")) unlock("night_visit_and_zukan");
     if (!isFound("complete_all") && foundCount() === window.EGG_TOTAL - 1) unlock("complete_all");
   }
 
@@ -271,7 +301,7 @@
     overlay.innerHTML = '<div class="eh-celebrate-card">' +
       '<div class="eh-celebrate-emoji">🎉🥚🎉</div>' +
       '<h2>コンプリート！</h2>' +
-      '<p>50個すべてのイースターエッグを見つけました。<br>あなたは正真正銘の「伝説のイースターエッグハンター」です。</p>' +
+      '<p>' + window.EGG_TOTAL + '個すべてのイースターエッグを見つけました。<br>あなたは正真正銘の「伝説のイースターエッグハンター」です。</p>' +
       '<button id="eh-celebrate-close" type="button">閉じる</button></div>';
     document.body.appendChild(overlay);
     document.getElementById("eh-celebrate-close").addEventListener("click", function () { overlay.remove(); });
@@ -279,16 +309,22 @@
 
   /* ---------------------------- コナミコマンド ---------------------------- */
   var KONAMI_SEQ = ["Up", "Up", "Down", "Down", "Left", "Right", "Left", "Right", "B", "A"];
+  var KONAMI_SEQ_REV = KONAMI_SEQ.slice().reverse();
   var konamiBuf = [];
   var KEY_MAP = { ArrowUp: "Up", ArrowDown: "Down", ArrowLeft: "Left", ArrowRight: "Right", a: "A", b: "B", A: "A", B: "B" };
 
   function feedKonami(token) {
     konamiBuf.push(token);
     if (konamiBuf.length > KONAMI_SEQ.length) konamiBuf.shift();
-    if (konamiBuf.length === KONAMI_SEQ.length && konamiBuf.every(function (v, i) { return v === KONAMI_SEQ[i]; })) {
-      konamiBuf = [];
-      if (document.body.getAttribute("data-page") === "404") unlock("konami_on_404");
-      else unlock("konami_code");
+    if (konamiBuf.length === KONAMI_SEQ.length) {
+      if (konamiBuf.every(function (v, i) { return v === KONAMI_SEQ[i]; })) {
+        konamiBuf = [];
+        if (document.body.getAttribute("data-page") === "404") unlock("konami_on_404");
+        else unlock("konami_code");
+      } else if (konamiBuf.every(function (v, i) { return v === KONAMI_SEQ_REV[i]; })) {
+        konamiBuf = [];
+        unlock("shortcut_konami_reverse");
+      }
     }
   }
 
@@ -299,6 +335,48 @@
       if (KEY_MAP[e.key]) feedKonami(KEY_MAP[e.key]);
       if (e.key === "`" || e.key === "~") { e.preventDefault(); openConsole(); }
     });
+
+    // 隠しショートカット類
+    var escStamps = [];
+    var enterHoldTimer = null;
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "E" || e.key === "e")) {
+        unlock("shortcut_ctrl_shift_e");
+      }
+      if (e.altKey && (e.key === "g" || e.key === "G")) {
+        unlock("shortcut_alt_g");
+      }
+      if (e.key === "Escape") {
+        var now = Date.now();
+        escStamps.push(now);
+        escStamps = escStamps.filter(function (t) { return now - t <= 3000; });
+        if (escStamps.length >= 5) unlock("shortcut_escape_x5");
+      }
+      if (e.key === "Enter" && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") && !enterHoldTimer) {
+        enterHoldTimer = setTimeout(function () { unlock("shortcut_enter_hold"); enterHoldTimer = null; }, 2000);
+      }
+    });
+    document.addEventListener("keyup", function (e) {
+      if (e.key === "Enter" && enterHoldTimer) { clearTimeout(enterHoldTimer); enterHoldTimer = null; }
+    });
+
+    // URLクエリパラメータ
+    try {
+      var qs = new URLSearchParams(location.search);
+      if (qs.get("egg") === "open") unlock("query_param_egg");
+    } catch (e) {}
+
+    // 視差効果を減らす設定
+    if (window.matchMedia) {
+      var rmMQL = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (rmMQL.matches) unlock("reduced_motion_pref");
+      addMQL(rmMQL, function (m) { if (m.matches) unlock("reduced_motion_pref"); });
+    }
+
+    // 早起き / 丑三つ時（アクセス時刻ベース）
+    var accessHour = new Date().getHours();
+    if (accessHour < 6) unlock("early_bird");
+    if (accessHour === 2) unlock("night_owl_2to3");
 
     // コピー / ペースト
     document.addEventListener("copy", function () { unlock("copy_paragraph"); });
@@ -377,13 +455,28 @@
     window.addEventListener("resize", checkWidth314);
     checkWidth314();
 
-    // 高速連打（1秒間に10回）
+    // 黄金比リサイズ
+    function checkGoldenRatio() {
+      if (window.innerHeight < 100) return;
+      var ratio = window.innerWidth / window.innerHeight;
+      if (ratio >= 1.55 && ratio <= 1.68 && window.innerWidth >= 400) unlock("golden_ratio_resize");
+    }
+    window.addEventListener("resize", checkGoldenRatio);
+    checkGoldenRatio();
+
+    // 高速連打（1秒間に10回）+ 合計クリック数
     var clickStamps = [];
+    var totalClickSaveTimer = null;
     document.addEventListener("click", function () {
       var now = Date.now();
       clickStamps.push(now);
       clickStamps = clickStamps.filter(function (t) { return now - t <= 1000; });
       if (clickStamps.length >= 10) unlock("speed_click_10in1s");
+
+      state.totalClicks++;
+      clearTimeout(totalClickSaveTimer);
+      totalClickSaveTimer = setTimeout(saveProgress, 400);
+      if (state.totalClicks >= 500) unlock("total_click_500");
     });
 
     // 余白ダブルクリック
@@ -411,12 +504,27 @@
       if (footer && footer.contains(e.target)) unlock("contextmenu_footer");
     });
 
-    // typeでたまご入力（入力欄）
+    // typeでたまご入力（入力欄）+ 汎用ワード入力 + 回文チェック + スライダー厳密値
     document.addEventListener("input", function (e) {
       var t = e.target;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA") && t.id !== "eh-console-input") {
-        if (String(t.value).indexOf("たまご") !== -1) unlock("type_tamago");
+      if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA") || t.id === "eh-console-input") return;
+      var val = String(t.value);
+      if (val.indexOf("たまご") !== -1) unlock("type_tamago");
+
+      var wordEgg = t.getAttribute("data-word-egg");
+      var word = t.getAttribute("data-word");
+      if (wordEgg && word && val.indexOf(word) !== -1) unlock(wordEgg);
+
+      var palEgg = t.getAttribute("data-palindrome-egg");
+      if (palEgg) {
+        var s = val.trim();
+        var chars = Array.from(s);
+        if (chars.length >= 3 && chars.join("") === chars.slice().reverse().join("")) unlock(palEgg);
       }
+
+      var sliderEgg = t.getAttribute("data-slider-egg");
+      var sliderVal = t.getAttribute("data-slider-value");
+      if (sliderEgg && sliderVal && String(t.value) === sliderVal) unlock(sliderEgg);
     });
 
     // 汎用 data-vibrate-btn / data-share-btn / data-geo-btn
@@ -448,6 +556,53 @@
         } else {
           unlock("geolocation_ask");
         }
+      }
+      var nb = e.target.closest && e.target.closest("[data-notify-btn]");
+      if (nb) {
+        if (window.Notification && Notification.requestPermission) {
+          Promise.resolve(Notification.requestPermission()).then(function (res) {
+            flashMessage(nb, res === "granted" ? "許可されました" : "選択されました");
+            unlock("notify_permission");
+          }).catch(function () { unlock("notify_permission"); });
+        } else {
+          flashMessage(nb, "このブラウザは非対応ですが記録しました");
+          unlock("notify_permission");
+        }
+      }
+      var wb = e.target.closest && e.target.closest("[data-webgl-btn]");
+      if (wb) {
+        var supported = false;
+        try {
+          var c = document.createElement("canvas");
+          supported = !!(c.getContext("webgl") || c.getContext("experimental-webgl"));
+        } catch (er) {}
+        flashMessage(wb, supported ? "WebGL対応です🎨" : "WebGL非対応でした");
+        unlock("webgl_check");
+      }
+      var jb = e.target.closest && e.target.closest("[data-justtime-btn]");
+      if (jb) {
+        var s = new Date().getSeconds();
+        flashMessage(jb, "現在" + s + "秒");
+        if (s === 0) unlock("just_time");
+      }
+    });
+
+    // 汎用「正解入力フォーム」（data-answer-form="egg_id" data-answer="こたえ" [data-answer-msg-id]）
+    document.addEventListener("submit", function (e) {
+      var form = e.target.closest && e.target.closest("[data-answer-form]");
+      if (!form) return;
+      e.preventDefault();
+      var eggId = form.getAttribute("data-answer-form");
+      var answer = (form.getAttribute("data-answer") || "").trim();
+      var input = form.querySelector("input, textarea");
+      var val = input ? String(input.value).trim() : "";
+      var msgEl = document.getElementById(form.getAttribute("data-answer-msg-id") || "");
+      var correct = val !== "" && val.toUpperCase() === answer.toUpperCase();
+      if (correct) {
+        unlock(eggId);
+        if (msgEl) msgEl.textContent = "正解！";
+      } else if (msgEl) {
+        msgEl.textContent = "うーん、違うみたい。";
       }
     });
 
@@ -538,8 +693,11 @@
     if (cmd === "tamago()") {
       unlock("console_command");
       out.textContent = "🥚 見つかった！コンソールコマンドのエッグをゲット。";
+    } else if (cmd === "himitsu()") {
+      unlock("console_himitsu");
+      out.textContent = "🔓 もう一つのコマンドも見つかった。";
     } else if (cmd === "help()") {
-      out.textContent = "使えるコマンド: tamago()";
+      out.textContent = "使えるコマンド: tamago() / himitsu()";
     } else {
       out.textContent = "そのコマンドは存在しません。help() を試してみて。";
     }
@@ -583,15 +741,40 @@
     el.addEventListener("touchend", cancel);
   };
 
+  // 全ページ駆け足ツアー（60秒以内にVALID_ROUTES相当を全部訪問）
+  var routeVisits = [];
+  var TOUR_ROUTES = ["home", "about", "gallery", "blog", "contact", "settings", "zukan", "minigame"];
+  function trackVisit(route) {
+    var now = Date.now();
+    routeVisits.push({ route: route, time: now });
+    routeVisits = routeVisits.filter(function (v) { return now - v.time <= 60000; });
+    var visited = {};
+    routeVisits.forEach(function (v) { visited[v.route] = true; });
+    if (TOUR_ROUTES.every(function (r) { return visited[r]; })) unlock("tour_all_pages");
+  }
+
   window.EggHunter = {
     unlock: unlock,
     isFound: isFound,
     foundCount: foundCount,
     tierTotal: tierTotal,
+    zukanTotal: zukanTotal,
+    zukanFound: zukanFound,
+    trackVisit: trackVisit,
+    markInteracted: function (key) {
+      if (state.interacted && !state.interacted[key]) {
+        state.interacted[key] = true;
+        saveProgress();
+        checkMeta();
+      }
+    },
     getSettings: function () { return settings; },
     setSetting: function (k, v) { settings[k] = v; saveSettings(); },
     resetProgress: function () {
-      state = { found: {}, playSeconds: 0 };
+      state = {
+        found: {}, playSeconds: 0, totalClicks: 0, hintUsed: false,
+        firstVisitAt: new Date().toISOString(), interacted: { dark: false, mute: false, sound: false }
+      };
       saveProgress();
       updateFab();
       renderTabs(); renderList();
@@ -599,6 +782,7 @@
     openPanel: openPanel,
     init: function () {
       if (!document.getElementById("egg-hunter-ui")) buildUI();
+      saveProgress(); // firstVisitAt を確実に永続化
       initGlobalTriggers();
       maybeShowOnboarding();
     }
@@ -611,7 +795,7 @@
     overlay.innerHTML = '<div class="eh-onboard-card">' +
       '<div class="eh-onboard-emoji">🥚✨</div>' +
       '<h2>ようこそ、エッグハント へ</h2>' +
-      '<p>このサイトのあちこちに、<strong>全50個</strong>のイースターエッグ（隠し要素）が隠れています。<br>' +
+      '<p>このサイトのあちこちに、<strong>全' + window.EGG_TOTAL + '個</strong>のイースターエッグ（隠し要素）が隠れています。<br>' +
       'クリック・タップ・スクロール・待つ・組み合わせる…あらゆる方法で見つけ出そう。<br>' +
       '進捗は自動でこの端末に保存されます。右下の🥚ボタンからコレクションをいつでも確認できます。</p>' +
       '<button id="eh-onboard-start" type="button">はじめる</button></div>';

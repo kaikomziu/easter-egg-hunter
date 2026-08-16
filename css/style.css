@@ -295,6 +295,31 @@ footer.site-footer {
 /* ---------------- riddle box ---------------- */
 .riddle-box { background: var(--bg-alt); border-left: 4px solid var(--accent); padding: 16px 18px; border-radius: 8px; font-size: 0.92rem; margin: 20px 0; }
 
+/* ---------------- zukan ---------------- */
+.zukan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; margin: 14px 0 28px; }
+.zukan-tile {
+  aspect-ratio: 1; border-radius: 12px; background: var(--card); border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-size: 1.6rem; padding: 6px; user-select: none; touch-action: manipulation;
+}
+.zukan-tile .zukan-tile-title { font-size: 0.6rem; color: var(--text-mute); text-align: center; line-height: 1.2; }
+.zukan-tile.collected { border-color: var(--accent-2); background: var(--bg-alt); box-shadow: 0 0 0 2px var(--accent-2) inset; }
+
+/* ---------------- minigame ---------------- */
+#reaction-arena { position: relative; height: 220px; background: var(--bg-alt); border-radius: 12px; margin-top: 10px; overflow: hidden; }
+#reaction-target {
+  position: absolute; width: 56px; height: 56px; border-radius: 50%; background: var(--accent);
+  display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: none; cursor: pointer;
+}
+#click100-target {
+  width: 70px; height: 70px; border-radius: 50%; border: none; font-size: 1.8rem; background: var(--bg-alt);
+  margin-top: 10px;
+}
+#stillness-target {
+  width: 90px; height: 90px; border-radius: 50%; background: var(--bg-alt); border: 2px dashed var(--accent-2);
+  display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 14px auto 0; user-select: none;
+}
+
 /* ---------------- responsive ---------------- */
 @media (max-width: 640px) {
   header.site-header { padding: 0 12px; }

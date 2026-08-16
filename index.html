@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EGG HUNT | イースターエッグを探せ</title>
-<meta name="description" content="サイト内に隠された50個のイースターエッグをすべて見つけ出せ！PC・スマホ両対応の隠し要素探索ゲーム。">
+<meta name="description" content="サイト内に隠された150個のイースターエッグをすべて見つけ出せ！PC・スマホ両対応の隠し要素探索ゲーム。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥚</text></svg>">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -18,6 +18,8 @@
     <a href="#gallery" data-route="gallery">ギャラリー</a>
     <a href="#blog" data-route="blog">ブログ</a>
     <a href="#contact" data-route="contact">お問い合わせ</a>
+    <a href="#zukan" data-route="zukan">図鑑</a>
+    <a href="#minigame" data-route="minigame">ミニゲーム</a>
     <a href="#settings" data-route="settings">設定</a>
   </nav>
   <div class="header-right">
@@ -33,7 +35,7 @@
     <div class="hero">
       <img id="hero-img" src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.85em%22 font-size=%2290%22>🐰</text></svg>" alt="うさぎ">
       <h1>EGG HUNT へようこそ</h1>
-      <p>このサイトのどこかに、全50個のイースターエッグが隠れています。<br>見た目はごく普通のサイトですが…油断は禁物です。</p>
+      <p>このサイトのどこかに、全150個のイースターエッグが隠れています。<br>見た目はごく普通のサイトですが…油断は禁物です。</p>
     </div>
 
     <div class="card-grid">
@@ -52,6 +54,11 @@
       <div class="card">
         <h3>ヘッダーの通知</h3>
         <p>🔔 は伊達じゃないかもしれない。</p>
+      </div>
+      <div class="card">
+        <h3>もうひとつのアイコン</h3>
+        <p>こちらも気になったら押してみて。</p>
+        <div class="icon-cycler" id="icon-cycler2">🐣</div>
       </div>
     </div>
 
@@ -80,6 +87,8 @@
     </div>
     <p>制作: 個人開発 / このサイトはGitHub Pagesで公開されています。</p>
   </section>
+  <!-- distributed_code fragment 1: 0 -->
+
 
   <!-- ============ HIMITSU (hidden reward page) ============ -->
   <section class="page-section" id="page-himitsu" data-route="himitsu">
@@ -93,13 +102,14 @@
     <h1>ギャラリー</h1>
     <p>いくつか写真を並べていますが、1枚だけ壊れているようです。</p>
     <div class="gallery-grid">
-      <div class="gallery-item" data-dbl>🌸</div>
+      <div class="gallery-item" data-dbl id="gallery-item-longpress">🌸</div>
       <div class="gallery-item" data-dbl>🍃</div>
       <div class="gallery-item broken" id="broken-img">🖼️💥</div>
       <div class="gallery-item" data-dbl>🌤️</div>
       <div class="gallery-item" data-dbl>🍂</div>
       <div class="gallery-item" data-dbl>🌊</div>
     </div>
+    <!-- distributed_code fragment 2: 8 -->
 
     <h2 style="margin-top:36px">収穫祭</h2>
     <p>ウサギをカゴまでドラッグ＆ドロップしてみよう。（スマホは指で長押ししてスライド）</p>
@@ -136,7 +146,30 @@
         <p id="blog-password-msg" style="font-size:.8rem;color:var(--accent)"></p>
       </form>
     </div>
+
+    <h2 style="margin-top:36px">つづき</h2>
+    <article class="card" style="margin-bottom:14px">
+      <h3>とんだ拾い物</h3>
+      <p style="font-size:.88rem;color:var(--text-mute)">散歩中に見つけた不思議な形の石。持ち帰って机に飾っています。</p>
+    </article>
+    <article class="card" style="margin-bottom:14px">
+      <h3>りんごとイースター</h3>
+      <p style="font-size:.88rem;color:var(--text-mute)">春になると、りんごの花とイースターエッグの飾りが庭に並びます。</p>
+    </article>
+
+    <div class="card">
+      <h3>🔑 合言葉（その2）</h3>
+      <p style="font-size:.85rem;color:var(--text-mute)">今回追加された2つの記事タイトルの頭文字をつなげてみて。</p>
+      <form data-answer-form="blog_acrostic2" data-answer="とり" data-answer-msg-id="blog-password-msg2" class="site-form" style="margin-top:10px">
+        <label>合言葉
+          <input type="text" placeholder="ひらがなで入力">
+        </label>
+        <button type="submit">送信</button>
+        <p id="blog-password-msg2" style="font-size:.8rem;color:var(--accent)"></p>
+      </form>
+    </div>
   </section>
+  <!-- distributed_code fragment 3: 1 -->
 
   <!-- ============ CONTACT ============ -->
   <section class="page-section" id="page-contact" data-route="contact">
@@ -150,7 +183,7 @@
         <input type="email" id="contact-email" name="email" autocomplete="off">
       </label>
       <label>メッセージ
-        <textarea id="contact-message" name="message" rows="4"></textarea>
+        <textarea id="contact-message" name="message" rows="4" data-word-egg="contact_message_word" data-word="ひみつ"></textarea>
       </label>
       <button type="submit">送信する</button>
       <p id="contact-msg" style="font-size:.8rem;color:var(--accent)"></p>
@@ -167,13 +200,14 @@
       <button class="btn" type="button" data-share-btn>シェアする</button>
     </div>
   </section>
+  <!-- distributed_code fragment 4: 7 -->
 
   <!-- ============ SETTINGS ============ -->
   <section class="page-section" id="page-settings" data-route="settings">
-    <h1>設定</h1>
+    <h1 id="settings-title">設定</h1>
 
     <div class="settings-row">
-      <div><strong>ダークモード</strong><div style="font-size:.78rem;color:var(--text-mute)">サイト全体の見た目を切り替えます</div></div>
+      <div><strong id="settings-label-darkmode">ダークモード</strong><div style="font-size:.78rem;color:var(--text-mute)">サイト全体の見た目を切り替えます</div></div>
       <label class="switch"><input type="checkbox" id="darkmode-toggle"><span class="slider"></span></label>
     </div>
 
@@ -183,7 +217,7 @@
     </div>
     <div class="settings-row">
       <div><strong>音量</strong></div>
-      <input type="range" id="volume-slider" min="0" max="100" value="50">
+      <input type="range" id="volume-slider" min="0" max="100" value="50" data-slider-egg="slider_volume_7" data-slider-value="7">
     </div>
 
     <div class="settings-row">
@@ -202,9 +236,48 @@
     </div>
 
     <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
-      <strong>画面幅シミュレーター（円周率マニア向け）</strong>
-      <div style="font-size:.78rem;color:var(--text-mute)">実際のウィンドウ幅: <span id="eh-width-display">-</span>　／　目標: 314px にリサイズしてみて（スマホはウィンドウを持つ端末では試せないので、PCでの挑戦を推奨）</div>
-      <input type="range" id="width-sim-slider" min="200" max="500" value="350" style="width:100%">
+      <strong>分散コード</strong>
+      <div style="font-size:.78rem;color:var(--text-mute)">About・ギャラリー・ブログ・お問い合わせの各ページのソースに1桁ずつ数字が隠れています。4桁で入力してください</div>
+      <form data-answer-form="distributed_code" data-answer="0817" style="display:flex;gap:8px;width:100%">
+        <input type="text" inputmode="numeric" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)" placeholder="4桁のコード" id="distributed-code-input">
+        <button class="btn" type="submit">送信</button>
+      </form>
+    </div>
+
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <strong id="settings-label-quiz">クイズ</strong>
+      <div style="font-size:.78rem;color:var(--text-mute)">全部で卵は何個あるでしょう？</div>
+      <form id="quiz-total-form" data-answer-form="quiz_total_eggs" style="display:flex;gap:8px;width:100%">
+        <input type="text" inputmode="numeric" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)" placeholder="数字で入力">
+        <button class="btn" type="submit">送信</button>
+      </form>
+    </div>
+
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <strong>回文チェック</strong>
+      <div style="font-size:.78rem;color:var(--text-mute)">前から読んでも後ろから読んでも同じ言葉を入力してみて（例: しんぶんし）</div>
+      <input type="text" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)" placeholder="回文を入力" data-palindrome-egg="palindrome_input">
+    </div>
+
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <strong id="settings-label-width">画面幅シミュレーター</strong>
+      <div style="font-size:.78rem;color:var(--text-mute)">実際のウィンドウ幅: <span id="eh-width-display">-</span>　／　円周率マニア向けは314、IMAXシアター向けは250にしてみて（スマホはPCでの挑戦を推奨）</div>
+      <input type="range" id="width-sim-slider" min="200" max="500" value="350" style="width:100%" data-slider-egg="slider_width_250" data-slider-value="250">
+    </div>
+
+    <div class="settings-row">
+      <div><strong>通知</strong><div style="font-size:.78rem;color:var(--text-mute)">許可・拒否どちらを選んでもOK</div></div>
+      <button class="btn btn-outline" type="button" data-notify-btn>🔔 通知を許可する</button>
+    </div>
+
+    <div class="settings-row">
+      <div><strong>グラフィック診断</strong></div>
+      <button class="btn btn-outline" type="button" data-webgl-btn>🖥️ 診断する</button>
+    </div>
+
+    <div class="settings-row">
+      <div><strong>今の時間を見る</strong><div style="font-size:.78rem;color:var(--text-mute)">秒がちょうど00の瞬間に押してみて</div></div>
+      <button class="btn btn-outline" type="button" data-justtime-btn>⏱️ 見る</button>
     </div>
 
     <div class="settings-row">
@@ -215,11 +288,62 @@
     <p style="font-size:.75rem;color:var(--text-mute);margin-top:24px">小さな点 <button class="tiny-dot" type="button" data-vibrate-btn aria-label="振動"></button> は、実は押せます。</p>
   </section>
 
+  <!-- ============ 図鑑 (ZUKAN) ============ -->
+  <section class="page-section" id="page-zukan" data-route="zukan">
+    <h1>図鑑</h1>
+    <p>ここには小さな生き物たちが集められています。触れると、コレクションに加わるかもしれません。かんたんなものは1回で、珍しいものほど根気が必要です。</p>
+    <div class="riddle-box">
+      この図鑑にも「裏側」があるという噂です。もし気になるなら、このページのアドレスの一番うしろに「#」をつけて、次の呼び名を足してみてください。呼び名は — <strong>zukan-ura</strong>。
+    </div>
+
+    <h2 style="margin-top:28px">かんたん</h2>
+    <div class="zukan-grid" id="zukan-easy"></div>
+    <h2 style="margin-top:28px">ふつう</h2>
+    <div class="zukan-grid" id="zukan-medium"></div>
+    <h2 style="margin-top:28px">むずかしい</h2>
+    <div class="zukan-grid" id="zukan-hard"></div>
+  </section>
+
+  <!-- ============ ZUKAN-URA (hidden reward page) ============ -->
+  <section class="page-section" id="page-zukan-ura" data-route="zukan-ura">
+    <h1>🌌 図鑑の裏側</h1>
+    <p>ここまでたどり着けるとは……お見事です。ここは図鑑の「裏側」、名もなき生き物たちの控え室です。</p>
+    <p>他の卵たちはまだ見つかるのを待っています。コレクションパネルから進捗を確認してみましょう。</p>
+  </section>
+
+  <!-- ============ ミニゲーム ============ -->
+  <section class="page-section" id="page-minigame" data-route="minigame">
+    <h1>ミニゲーム</h1>
+
+    <div class="card" style="margin-bottom:20px">
+      <h3>⚡ 反射神経ゲーム</h3>
+      <p style="font-size:.85rem;color:var(--text-mute)">「スタート」を押すと、的がランダムな場所にランダムなタイミングで5回出現します。出てきたらすぐタップ／クリック！</p>
+      <div id="reaction-arena">
+        <button id="reaction-start" type="button" class="btn">スタート</button>
+        <div id="reaction-target" class="eh-hidden">🎯</div>
+      </div>
+      <p id="reaction-status" style="font-size:.85rem;color:var(--accent);margin-top:8px"></p>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <h3>👆 百打の的</h3>
+      <p style="font-size:.85rem;color:var(--text-mute)">この的を合計100回クリック／タップしてみよう。（現在: <span id="click100-count">0</span> / 100）</p>
+      <button id="click100-target" type="button" class="btn">🔴</button>
+    </div>
+
+    <div class="card">
+      <h3>🗿 静止チャレンジ</h3>
+      <p style="font-size:.85rem;color:var(--text-mute)">下の的の上にカーソル／指を置いて、15秒間まったく動かさずにいてみよう。</p>
+      <div id="stillness-target">🧘</div>
+      <p id="stillness-status" style="font-size:.85rem;color:var(--accent);margin-top:8px"></p>
+    </div>
+  </section>
+
 </main>
 
 <footer class="site-footer">
   <p>© <span id="footer-year">2026</span> EGG HUNT — Easter Egg Hunting Game</p>
-  <p style="opacity:.6">Made for people who like to look closely.</p>
+  <p style="opacity:.6" id="footer-credit">Made for people who like to look closely.</p>
   <p style="opacity:.4;font-size:.7rem" id="footer-version"></p>
 </footer>
 
